@@ -41,9 +41,10 @@ class ComputadoraTest {
     fun probarComputadora() {
 
         val programas = listOf(
-            Programa("Notion 2026"),
-            Programa("Facebook 2024"),
-            Programa("WhatsApp 2026")
+            Programa("notion 2026"),
+            Programa("facebook 2024"),
+            Programa("WhatsApp 2026"),
+            Programa("IG 2026")
         )
 
         val pc = Computadora(
