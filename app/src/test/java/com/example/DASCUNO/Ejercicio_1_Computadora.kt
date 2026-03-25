@@ -1,7 +1,7 @@
-package com.example.pdm_labo_1
+package com.example.DASCUNO
 
 import org.junit.Test
-data class Programa(
+class Programa(
     val nombre: String
 )
 

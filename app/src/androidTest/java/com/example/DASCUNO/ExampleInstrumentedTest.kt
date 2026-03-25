@@ -1,4 +1,4 @@
-package com.example.pdm_labo_1
+package com.example.DASCUNO
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

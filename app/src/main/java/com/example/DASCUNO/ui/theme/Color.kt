@@ -1,4 +1,4 @@
-package com.example.pdm_labo_1.ui.theme
+package com.example.DASCUNO.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
