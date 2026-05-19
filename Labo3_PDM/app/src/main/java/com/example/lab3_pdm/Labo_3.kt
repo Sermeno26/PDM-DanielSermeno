@@ -15,22 +15,18 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 
 data class Persona(var nombre: String)
 
@@ -40,27 +36,33 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val navController = rememberNavController()
-
-            NavHost(
-                navController = navController,
-                startDestination = "ventana_principal"
-            ) {
-                composable("ventana_principal") {
-                    Ventana(navController)
-                }
-
-                composable("sensores") {
-                    VentanaListado(navController)
-                }
-            }
-
-
+            App()
         }
     }
 }
+@Preview
+@Composable
+fun App() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        composable("home") {
+            Ventana(navController)
+        }
+
+        composable("sensores") {
+            PantallaSensores(navController)
+        }
+    }
+}
+
+
 @Composable
 fun Ventana(navController: NavHostController) {
+
     var nombre by remember { mutableStateOf("") }
     val listaPersona = remember { mutableStateListOf<Persona>() }
 
@@ -78,35 +80,32 @@ fun Ventana(navController: NavHostController) {
             placeholder = { Text("Nombre") }
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = {
-                    if (nombre.isNotEmpty()) {
-                        listaPersona.add(Persona(nombre))
-                        nombre = ""
-                    }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = {
+                if (nombre.isNotEmpty()) {
+                    listaPersona.add(Persona(nombre))
+                    nombre = ""
                 }
-            ) {
-                Text("Guardar")
-            }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Guardar")
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = {
+                navController.navigate("sensores")
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Button(
-                onClick = {
-                    navController.navigate("sensores")
-                }
-            ) {
-                Text("Vista sensores")
-            }
+            Text("Ir a sensores")
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -114,7 +113,7 @@ fun Ventana(navController: NavHostController) {
         ) {
 
             Text(
-                text = "Listado de nombres y posición en la lista",
+                text = "Listado de nombres",
                 modifier = Modifier.weight(1f)
             )
 
@@ -125,17 +124,21 @@ fun Ventana(navController: NavHostController) {
             }
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .border(BorderStroke(3.dp, Color.Blue))
-                .padding(12.dp)
+                .border(BorderStroke(2.dp, Color.Blue))
+                .padding(8.dp)
         ) {
 
             LazyColumn {
                 itemsIndexed(listaPersona) { index, persona ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(persona.nombre)
@@ -147,78 +150,87 @@ fun Ventana(navController: NavHostController) {
     }
 }
 
-@Composable
-fun VentanaListado(navController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = {
-                    navController.popBackStack()
-                }
-            ) {
-                Text("Volver")
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .border(BorderStroke(3.dp, Color.Blue))
-                .padding(12.dp)
-        ) {
-            LightSensor()
-        }
-    }
-}
+//////////////////////////////////////////////////////////
+// 📱 PANTALLA DE SENSORES
+//////////////////////////////////////////////////////////
 
 @Composable
-fun useSensor(sensorType: Int): List<Float> {
+fun PantallaSensores(navController: NavHostController) {
+
     val context = LocalContext.current
-    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-    val sensor = sensorManager.getDefaultSensor(sensorType) ?: return emptyList()
-    var sensorValues by remember { mutableStateOf(listOf(0f, 0f, 0f)) }
+    val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    DisposableEffect(sensorType) {
+    var x by remember { mutableFloatStateOf(0f) }
+    var y by remember { mutableFloatStateOf(0f) }
+    var z by remember { mutableFloatStateOf(0f) }
+
+    var vista by remember { mutableIntStateOf(1) }
+
+    DisposableEffect(Unit) {
+
         val listener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent?) {
-                event?.values?.let {
-                    sensorValues = it.toList()
-                }
+            override fun onSensorChanged(event: SensorEvent) {
+                x = event.values[0]
+                y = event.values[1]
+                z = event.values[2]
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+        sensorManager.registerListener(
+            listener,
+            accelerometer,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
 
         onDispose {
             sensorManager.unregisterListener(listener)
         }
     }
 
-    return sensorValues
-}
-@Composable
-fun LightSensor () {
-    val lightValues = useSensor(Sensor.TYPE_LIGHT)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
 
-    Scaffold { innerPadding ->
-        Column (
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Text("Sensores", style = MaterialTheme.typography.titleLarge)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (vista == 1) {
+            Text("Vista 1")
+            Text("X: $x")
+            Text("Y: $y")
+        } else {
+            Text("Vista 2")
+            Text("Z: $z")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                vista = if (vista == 1) 2 else 1
+            },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Sensor de Luz", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(text = "Intensidad:${lightValues[0]} lx", fontSize = 18.sp)
+            Text("Cambiar vista")
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Button(
+            onClick = {
+                navController.popBackStack()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Regresar")
         }
     }
 }
