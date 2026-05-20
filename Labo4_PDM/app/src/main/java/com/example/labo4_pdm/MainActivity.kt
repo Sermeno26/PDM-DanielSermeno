@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.labo4_pdm.NavController.NavigationGraph
 import com.example.labo4_pdm.ui.theme.Labo4_PDMTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,10 +20,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Labo4_PDMTheme {
-
-                    )
+                        NavigationGraph()
                 }
             }
         }
     }
-}

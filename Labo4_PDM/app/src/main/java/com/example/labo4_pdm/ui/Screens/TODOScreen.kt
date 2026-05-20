@@ -31,7 +31,6 @@ fun TODOScreen(viewModel: GeneralViewModel, onNavigateToCreate: () -> Unit) {
         ) {
             items(tasks.value) { task ->
                 Log.d("Task", task.toString())
-
                 TaskCard(task = task)
             }
         }
