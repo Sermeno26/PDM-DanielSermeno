@@ -75,3 +75,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+// Pégalo hasta abajo de tu archivo
+ksp {
+    arg("room.generateKotlin", "true")
+}
