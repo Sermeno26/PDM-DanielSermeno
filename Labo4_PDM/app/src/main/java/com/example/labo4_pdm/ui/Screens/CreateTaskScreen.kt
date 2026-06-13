@@ -30,8 +30,9 @@ fun CreateTaskScreen(viewModel: GeneralViewModel, onNavigateBack: () -> Unit) {
         Button(
             onClick = {
                 if (title.isNotEmpty() && description.isNotEmpty()) {
+                    // Dentro del onClick de tu botón:
                     val newTask = Task(
-                        id = Random.nextInt(1, 1000),
+                        id = 0, // 0 indica a Room que genere el ID automáticamente
                         title = title,
                         description = description,
                         endDate = endDate,
